@@ -1,0 +1,295 @@
+
+<!DOCTYPE html>
+<html lang="sa">
+<head>
+  <meta charset="UTF-8">
+  <title>NĀRA Learner Portal</title>
+  <style>
+    body { font-family: sans-serif; background: #fdfcf7; color: #222; padding: 2em; }
+    textarea { width: 100%; height: 180px; font-family: monospace; font-size: 1em; margin-bottom: 1em; }
+    button { padding: 0.5em 1em; font-size: 1em; margin: 0.5em 0; }
+    .hidden { display: none; }
+    .lesson { margin-bottom: 2em; padding: 1em; background: #fff; border: 1px solid #ccc; }
+    .complete { background: #e0ffe0; border-color: #0c0; }
+  </style>
+</head>
+<body>
+  <h1>📘 NĀRA Learner Portal</h1>
+  <p>Welcome to your training in the first AI-native language written in Sanskrit. Complete lessons, write agents, earn your certification.</p>
+
+  <div id="lessons">
+    <div id="lesson1" class="lesson">
+      <h2>🧠 Lesson 1: Define a Basic Agent</h2>
+      <p>Use <code>पुरुषः</code> and <code>गुणाः</code> to declare a NĀRA agent.</p>
+      <textarea id="lesson1_input" placeholder="पुरुषः शिक्षकः अस्ति { गुणाः: ['ज्ञान'] }"></textarea>
+      <button onclick="checkLesson('lesson1', ['पुरुषः', 'गुणाः'])">Check</button>
+      <div id="lesson1_result"></div>
+    
+    <div id="lesson1_quiz">
+      <p><strong>🧠 Quiz:</strong> What does <code>गुणाः</code> represent in an agent?</p>
+      <label><input type="radio" name="quiz1" value="A"> Output logic</label><br>
+      <label><input type="radio" name="quiz1" value="B"> Emotional traits ✅</label><br>
+      <label><input type="radio" name="quiz1" value="C"> Input type</label><br>
+      <label><input type="radio" name="quiz1" value="D"> Agent name</label><br>
+      <button onclick="checkQuiz('quiz1', 'B')">Check Answer</button>
+      <div id="quiz1_result"></div>
+    </div>
+    
+
+    <div id="lesson2" class="lesson">
+      <h2>🔁 Lesson 2: Create a Feedback Loop</h2>
+      <p>Use <code>प्रत्युपकर्षः</code> to add recursion or correction logic.</p>
+      <textarea id="lesson2_input" placeholder="यदि फलम् != 'सन्तुलितम्' तर्हि प्रत्युपकर्षं कृत्वा शिक्षां कुरु"></textarea>
+      <button onclick="checkLesson('lesson2', ['प्रत्युपकर्षः'])">Check</button>
+      <div id="lesson2_result"></div>
+    
+    <div id="lesson2_quiz">
+      <p><strong>🔁 Quiz:</strong> Which keyword starts a feedback learning loop?</p>
+      <label><input type="radio" name="quiz2" value="A"> प्रवेशः</label><br>
+      <label><input type="radio" name="quiz2" value="B"> गुरुः</label><br>
+      <label><input type="radio" name="quiz2" value="C"> प्रत्युपकर्षः ✅</label><br>
+      <label><input type="radio" name="quiz2" value="D"> अन्यथा</label><br>
+      <button onclick="checkQuiz('quiz2', 'C')">Check Answer</button>
+      <div id="quiz2_result"></div>
+    </div>
+    
+
+    <div id="lesson3" class="lesson">
+      <h2>🤖 Lesson 3: Define Multiple Agents</h2>
+      <p>Declare more than one agent in your code.</p>
+      <textarea id="lesson3_input" placeholder="पुरुषः शिक्षकः अस्ति {...} पुरुषः राजदूतः अस्ति {...}"></textarea>
+      <button onclick="checkLesson('lesson3', ['पुरुषः'])">Check</button>
+      <div id="lesson3_result"></div>
+    </div>
+  </div>
+
+  <script>
+    function checkLesson(id, keywords) {
+      const code = document.getElementById(id + "_input").value;
+      const result = document.getElementById(id + "_result");
+      const lesson = document.getElementById(id);
+      let passed = true;
+
+      for (let word of keywords) {
+        if (!code.includes(word)) {
+          passed = false;
+          result.innerText = "❌ Missing keyword: " + word;
+          result.style.color = "red";
+          break;
+        }
+      }
+
+      if (passed) {
+        result.innerText = "✅ Lesson complete!";
+        result.style.color = "green";
+        lesson.classList.add("complete");
+      }
+    }
+  
+    function checkQuiz(id, correct) {
+      const selected = document.querySelector(`input[name="${id}"]:checked`);
+      const resultDiv = document.getElementById(id + "_result");
+      if (!selected) {
+        resultDiv.textContent = "❗ Please select an answer.";
+        resultDiv.style.color = "orange";
+        return;
+      }
+      if (selected.value === correct) {
+        resultDiv.textContent = "✅ Correct!";
+      saveQuizScore(id, correct, true);
+        resultDiv.style.color = "green";
+      } else {
+        resultDiv.textContent = "❌ Incorrect.";
+      saveQuizScore(id, correct, false);
+        resultDiv.style.color = "red";
+      }
+    }
+    
+
+    function saveQuizScore(id, correct, isCorrect) {
+      let score = JSON.parse(localStorage.getItem("nara_quiz_scores") || "{}");
+      score[id] = isCorrect;
+      localStorage.setItem("nara_quiz_scores", JSON.stringify(score));
+    }
+
+    function loadQuizScores() {
+      const score = JSON.parse(localStorage.getItem("nara_quiz_scores") || "{}");
+      for (const id in score) {
+        const resultDiv = document.getElementById(id + "_result");
+        if (score[id]) {
+          resultDiv.textContent = "✅ Previously passed.";
+          resultDiv.style.color = "green";
+        } else {
+          resultDiv.textContent = "❌ Previously incorrect.";
+          resultDiv.style.color = "red";
+        }
+      }
+    }
+    window.onload = function() {
+      loadProgress();
+      loadQuizScores();
+    };
+    
+
+    function checkCertificateEligibility() {
+      const lessons = document.querySelectorAll(".lesson.complete");
+      const score = JSON.parse(localStorage.getItem("nara_quiz_scores") || "{}");
+      const passedQuizzes = ["quiz1", "quiz2", "quiz3"].every(id => score[id] === true);
+
+      if (lessons.length >= 3 && passedQuizzes) {
+        document.getElementById("certificateSection").style.display = "block";
+      } else {
+        alert("📚 Complete all lessons and quizzes to unlock your certificate.");
+      }
+    }
+    
+</script>
+
+  <script>
+    function saveProgress() {
+      const progress = {};
+      document.querySelectorAll(".lesson").forEach(lesson => {
+        const id = lesson.id;
+        const code = document.getElementById(id + "_input").value;
+        const complete = lesson.classList.contains("complete");
+        progress[id] = { code, complete };
+      });
+      localStorage.setItem("nara_progress", JSON.stringify(progress));
+      alert("✅ Progress saved.");
+    }
+
+    function loadProgress() {
+      const progress = JSON.parse(localStorage.getItem("nara_progress") || "{}");
+      for (const id in progress) {
+        const entry = progress[id];
+        const input = document.getElementById(id + "_input");
+        const lesson = document.getElementById(id);
+        const result = document.getElementById(id + "_result");
+
+        if (input) input.value = entry.code;
+        if (entry.complete) {
+          lesson.classList.add("complete");
+          result.innerText = "✅ Lesson complete!";
+          result.style.color = "green";
+        }
+      }
+    }
+
+    window.onload = loadProgress;
+  
+    function checkQuiz(id, correct) {
+      const selected = document.querySelector(`input[name="${id}"]:checked`);
+      const resultDiv = document.getElementById(id + "_result");
+      if (!selected) {
+        resultDiv.textContent = "❗ Please select an answer.";
+        resultDiv.style.color = "orange";
+        return;
+      }
+      if (selected.value === correct) {
+        resultDiv.textContent = "✅ Correct!";
+      saveQuizScore(id, correct, true);
+        resultDiv.style.color = "green";
+      } else {
+        resultDiv.textContent = "❌ Incorrect.";
+      saveQuizScore(id, correct, false);
+        resultDiv.style.color = "red";
+      }
+    }
+    
+
+    function saveQuizScore(id, correct, isCorrect) {
+      let score = JSON.parse(localStorage.getItem("nara_quiz_scores") || "{}");
+      score[id] = isCorrect;
+      localStorage.setItem("nara_quiz_scores", JSON.stringify(score));
+    }
+
+    function loadQuizScores() {
+      const score = JSON.parse(localStorage.getItem("nara_quiz_scores") || "{}");
+      for (const id in score) {
+        const resultDiv = document.getElementById(id + "_result");
+        if (score[id]) {
+          resultDiv.textContent = "✅ Previously passed.";
+          resultDiv.style.color = "green";
+        } else {
+          resultDiv.textContent = "❌ Previously incorrect.";
+          resultDiv.style.color = "red";
+        }
+      }
+    }
+    window.onload = function() {
+      loadProgress();
+      loadQuizScores();
+    };
+    
+
+    function checkCertificateEligibility() {
+      const lessons = document.querySelectorAll(".lesson.complete");
+      const score = JSON.parse(localStorage.getItem("nara_quiz_scores") || "{}");
+      const passedQuizzes = ["quiz1", "quiz2", "quiz3"].every(id => score[id] === true);
+
+      if (lessons.length >= 3 && passedQuizzes) {
+        document.getElementById("certificateSection").style.display = "block";
+      } else {
+        alert("📚 Complete all lessons and quizzes to unlock your certificate.");
+      }
+    }
+    
+</script>
+  <p>
+    <button onclick="saveProgress()">💾 Save Progress</button>
+  </p>
+
+
+  <hr>
+  <h2>📘 NĀRA Syntax Reference</h2>
+  <div id="syntaxRef" class="lesson" style="background:#f9f9f9;">
+    <h3>🔰 Level 1: Basics</h3>
+    <pre>पुरुषः शिक्षकः अस्ति {
+    गुणाः: ["ज्ञान", "धैर्य"]
+    प्रवेशः: छात्र_प्रश्नः
+    निर्गमः: उत्तरम्
+}</pre>
+
+    <h3>🔁 Level 2: Tasks and Conditions</h3>
+    <pre>कर्मे "ज्ञानप्रश्नं उत्तर" यदा:
+    यदि छात्र_प्रश्नः == "सूत्रम्":
+        उत्तरम् = "विद्या ददाति विनयं"
+    अन्यथा:
+        उत्तरम् = "प्रश्नं विश्लेष्यताम्"</pre>
+
+    <h3>🔄 Level 3: Feedback</h3>
+    <pre>यदि फलम् != "सन्तुलितम्" तर्हि प्रत्युपकर्षं कृत्वा शिक्षां कुरु</pre>
+
+    <h3>🧬 Level 4: Memory and State</h3>
+    <pre>यदि उपयोगकर्ता.भावना == "चिन्तायुक्तः":
+    स्मृति["शान्ति_चाहिए"] = True</pre>
+
+    <h3>🤖 Level 5: Multi-Agent</h3>
+    <pre>पुरुषः वैद्यः अस्ति { गुणाः: [...] }
+पुरुषः राजदूतः अस्ति { गुणाः: [...] }</pre>
+
+    <h3>🌌 Level 6: API or LLM Integration</h3>
+    <pre>यदि उपयोगकर्ता.भावना == "अज्ञात":
+    आह्वानं AI_Guru सह "मार्गदर्शन याचना"</pre>
+  </div>
+
+
+  <div id="certificateSection" style="display:none; margin-top: 2em; padding: 1em; border: 2px solid green; background: #e6ffe6;">
+    <h2>🎓 NĀRA Initiate Certificate</h2>
+    <p>You've completed the basic training in NĀRA — download your certificate of initiation.</p>
+    <a href="https://nara.dev/certificate/NARA_Certificate.pdf" target="_blank" download>
+      <button>📥 Download Certificate</button>
+    </a>
+  </div>
+  <p><button onclick="checkCertificateEligibility()">🎓 Check for Certificate</button></p>
+
+
+  <hr>
+  <h2>📡 Live Agent Memory Monitor</h2>
+  <p>Want to visualize what your agent is remembering? View the memory dashboard:</p>
+  <a href="dashboard.html" target="_blank">
+    <button>📊 Open Memory Dashboard</button>
+  </a>
+
+</body>
+</html>

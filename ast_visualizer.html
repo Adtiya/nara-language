@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>NĀRA AST Visualizer</title>
+  <style>
+    body { font-family: sans-serif; background: #f0f0f0; padding: 2em; }
+    textarea { width: 100%; height: 180px; }
+    pre { background: white; padding: 1em; border: 1px solid #ccc; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h2>🧩 NĀRA AST Visualizer</h2>
+  <textarea id="naraInput">// पुरुषः वैद्यः अस्ति { गुणाः: [...] }</textarea>
+  <button onclick="visualizeAST()">Visualize AST</button>
+  <pre id="output">AST output will appear here...</pre>
+
+  <script>
+    function visualizeAST() {
+      const input = document.getElementById("naraInput").value;
+      const ast = [];
+
+      if (input.includes("पुरुषः")) ast.push({ type: "AgentDeclaration", name: "पुरुषः" });
+      if (input.includes("गुणाः")) ast.push({ type: "Traits", values: "..." });
+      if (input.includes("प्रवेशः")) ast.push({ type: "Input", value: "..." });
+      if (input.includes("निर्गमः")) ast.push({ type: "Output", value: "..." });
+      if (input.includes("कर्मे")) ast.push({ type: "Task", name: "..." });
+      if (input.includes("यदि")) ast.push({ type: "Condition", rule: "..." });
+
+      document.getElementById("output").textContent = JSON.stringify(ast, null, 2);
+    }
+  </script>
+</body>
+</html>
