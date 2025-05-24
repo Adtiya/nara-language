@@ -1,10 +1,134 @@
+
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta http-equiv="refresh" content="0; url=learn.html" />
-    <title>NĀRA Redirect</title>
-  </head>
-  <body>
-    <p>Redirecting to the NĀRA Learner Portal... <a href="learn.html">Click here if not redirected</a>.</p>
-  </body>
+<html lang="sa">
+<head>
+  <meta charset="UTF-8">
+  <title>NĀRA Agent Runner</title>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f4; padding: 2em; }
+    textarea { width: 100%; height: 200px; font-size: 1em; font-family: monospace; }
+    button { padding: 0.5em 1em; font-size: 1em; margin-top: 1em; }
+    pre { background: #fff; padding: 1em; border: 1px solid #ccc; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>🕉️ NĀRA Web Agent Runner with Memory + Feedback</h1>
+  <p>Enter your Sanskrit `.nara` code below:</p>
+  <textarea id="naraInput">// पुरुषः वैद्यः अस्ति { गुणाः: ["सहानुभूति"] प्रवेशः: आरोग्य_स्थिति निर्गमः: मार्गदर्शन_योजना }</textarea>
+  <br>
+  <button onclick="runNara()">🔁 Run Agent</button>
+  <button onclick="resetMemory()">🧹 Reset Memory</button>
+  
+  <button onclick="saveSession()">💾 Save Session</button>
+  <button onclick="loadSession()">📂 Load Session</button>
+
+  <pre id="output">Output will appear here...</pre>
+  <h3>📊 Memory Evolution</h3>
+  <h3>🤖 बुद्धिसंवाद (LLM Agent Response)</h3>
+  <pre id="llmResponse" style="background:#eef; padding:1em; border:1px solid #99f; white-space:pre-wrap; height:120px; overflow:auto;">LLM response will appear here...</pre>
+
+  <div id="memoryLog" style="background:#fff; padding:1em; border:1px solid #ccc; white-space:pre-wrap; height:200px; overflow:auto;"></div>
+
+  <script>
+    let memory = {};
+
+    function validateNara(code) {
+      const errors = [];
+      if (!code.includes("पुरुषः") || !code.includes("अस्ति")) {
+        errors.push("❌ Missing agent declaration using 'पुरुषः ... अस्ति'");
+      }
+      if (!code.includes("प्रवेशः") || !code.includes("निर्गमः")) {
+        errors.push("❌ Missing 'प्रवेशः' (input) or 'निर्गमः' (output) section");
+      }
+      if (!code.includes("कर्मे")) {
+        errors.push("❌ Missing task definition using 'कर्मे ... यदा'");
+      }
+      if (!code.includes("यदि")) {
+        errors.push("❌ Missing conditional logic using 'यदि'");
+      }
+      return errors;
+    }
+
+    function runNara() {
+      const input = document.getElementById("naraInput").value;
+      const validationErrors = validateNara(input);
+      let output = "📜 Validation Results:\n";
+
+      if (validationErrors.length > 0) {
+        output += validationErrors.join("\n") + "\n\nExecution skipped due to syntax errors.";
+        document.getElementById("output").textContent = output;
+
+      // Simulated LLM agent response
+      const llmOut = input.includes("चिन्तायुक्तः") ?
+        "💬 [Guru AI]: ध्यानं कुर्व, चक्र सन्तुलनं प्राप्तव्यं।" :
+        "💬 [Guru AI]: सम्यक् स्थिति — स्मृत्या सह सामञ्जस्यं स्थापितम्।";
+      document.getElementById("llmResponse").textContent = llmOut;
+    
+
+      const memoryLog = document.getElementById("memoryLog");
+      const timestamp = new Date().toLocaleTimeString();
+      const memSnapshot = JSON.stringify(memory, null, 2);
+      memoryLog.textContent += `[${timestamp}]\n` + memSnapshot + "\n\n";
+    
+        return;
+      }
+
+      output += "✅ Syntax valid. Executing agent...\n\n";
+      output += "🧠 स्मृति स्थिति (Memory State):\n";
+      output += JSON.stringify(memory, null, 2) + "\n\n";
+
+      if (input.includes("चिन्तायुक्तः")) {
+        output += "🧘 चिन्तायुक्तः detected. Activating calm protocol: चक्र सन्तुलन\n";
+        memory["भावना"] = "शान्त";
+      } else {
+        output += "🔮 Defaulting to सामञ्जस्य AI स्मृति layer\n";
+        memory["भावना"] = "सामान्य";
+      }
+
+      if (input.includes("!= \"सन्तुलितम्\"")) {
+        output += "🔁 प्रत्युपकर्षः: परिणाम असन्तुलितम् — शिक्षां आरभते\n";
+        memory["अभ्यासः"] = "सक्रिय";
+      } else {
+        output += "✅ सन्तुलन सिद्धः — पुनशिक्षणं आवश्यकं न\n";
+        memory["अभ्यासः"] = "स्थगित";
+      }
+
+      document.getElementById("output").textContent = output;
+
+      // Simulated LLM agent response
+      const llmOut = input.includes("चिन्तायुक्तः") ?
+        "💬 [Guru AI]: ध्यानं कुर्व, चक्र सन्तुलनं प्राप्तव्यं।" :
+        "💬 [Guru AI]: सम्यक् स्थिति — स्मृत्या सह सामञ्जस्यं स्थापितम्।";
+      document.getElementById("llmResponse").textContent = llmOut;
+    
+
+      const memoryLog = document.getElementById("memoryLog");
+      const timestamp = new Date().toLocaleTimeString();
+      const memSnapshot = JSON.stringify(memory, null, 2);
+      memoryLog.textContent += `[${timestamp}]\n` + memSnapshot + "\n\n";
+    
+    }
+
+    
+    function saveSession() {
+      const code = document.getElementById("naraInput").value;
+      localStorage.setItem("nara_code", code);
+      localStorage.setItem("nara_memory", JSON.stringify(memory));
+      document.getElementById("output").textContent = "💾 Session saved to localStorage.";
+    }
+
+    function loadSession() {
+      const code = localStorage.getItem("nara_code");
+      const mem = localStorage.getItem("nara_memory");
+      if (code) document.getElementById("naraInput").value = code;
+      if (mem) memory = JSON.parse(mem);
+      document.getElementById("output").textContent = "📂 Session loaded from localStorage.";
+    }
+
+    function resetMemory() {
+      memory = {};
+      document.getElementById("output").textContent = "🧹 Memory has been cleared.";
+    }
+  </script>
+</body>
 </html>
