@@ -1,9 +1,0 @@
-{
-  "name": "NARA",
-  "scopeName": "source.nara",
-  "patterns": [
-    { "match": "\\b(पुरुषः|गुणाः|प्रवेशः|निर्गमः|कर्मे|यदि|अन्यथा|प्रत्युपकर्षः|स्मृति|आह्वानं)\\b", "name": "keyword.control.nara" }
-  ],
-  "repository": {},
-  "fileTypes": ["nara"]
-}
