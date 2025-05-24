@@ -1,0 +1,24 @@
+{
+  "NARA Agent": {
+    "prefix": "agent",
+    "body": [
+      "पुरुषः ${1:नाम} अस्ति {",
+      "    गुणाः: ["${2:गुण}"]",
+      "    प्रवेशः: ${3:input}",
+      "    निर्गमः: ${4:output}",
+      "}"
+    ],
+    "description": "Define a NARA agent"
+  },
+  "NARA Task Block": {
+    "prefix": "task",
+    "body": [
+      "कर्मे "${1:कार्य}" यदा:",
+      "    यदि ${2:शर्त}:",
+      "        ${3:क्रिया}",
+      "    अन्यथा:",
+      "        ${4:विकल्प}"
+    ],
+    "description": "Define a task with condition and fallback"
+  }
+}
