@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html lang="sa">
+<head>
+  <meta charset="UTF-8">
+  <title>NĀRA AST Debugger</title>
+  <style>
+    body { font-family: monospace; background: #fefefe; padding: 2em; }
+    textarea { width: 100%; height: 180px; font-size: 1em; font-family: monospace; }
+    pre { background: #f9f9f9; padding: 1em; border: 1px solid #ccc; white-space: pre-wrap; }
+    .highlight { background-color: #ffffcc; }
+  </style>
+</head>
+<body>
+  <h1>🔍 NĀRA AST Debugger</h1>
+  <p>Paste your <code>.nara</code> code below to visualize its abstract syntax tree.</p>
+  <textarea id="naraInput">// पुरुषः वैद्यः अस्ति { गुणाः: ["सहानुभूति"] प्रवेशः: आरोग्य_स्थिति निर्गमः: मार्गदर्शन_योजना }</textarea>
+  <br><button onclick="parseNara()">🧠 Parse AST</button>
+  <pre id="output">AST will appear here...</pre>
+
+  <script>
+    function parseNara() {
+      const code = document.getElementById("naraInput").value;
+      const output = document.getElementById("output");
+      const ast = [];
+
+      if (code.includes("पुरुषः")) {
+        const agents = [...code.matchAll(/पुरुषः (.*?) अस्ति/g)];
+        agents.forEach(match => {
+          ast.push({ type: "Agent", name: match[1].trim() });
+        });
+      }
+
+      if (code.includes("गुणाः")) {
+        const traits = code.match(/गुणाः:\s*\[(.*?)\]/);
+        if (traits) {
+          ast.push({ type: "Traits", values: traits[1].split(",").map(t => t.trim().replace(/['"]/g, "")) });
+        }
+      }
+
+      if (code.includes("कर्मे")) {
+        const tasks = [...code.matchAll(/कर्मे "(.*?)" यदा:/g)];
+        tasks.forEach(match => {
+          ast.push({ type: "Task", name: match[1].trim() });
+        });
+      }
+
+      if (code.includes("यदि")) {
+        ast.push({ type: "Condition", value: "यदि block present" });
+      }
+
+      if (code.includes("प्रत्युपकर्षः")) {
+        ast.push({ type: "Recursion", logic: "Feedback loop detected" });
+      }
+
+      output.textContent = JSON.stringify(ast, null, 2);
+    }
+  </script>
+</body>
+</html>
