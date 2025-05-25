@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="sa">
+<head>
+  <meta charset="UTF-8">
+  <title>NĀRA Infinity Agent Simulator</title>
+  <style>
+    body { font-family: sans-serif; background: #fdf6e3; padding: 2em; }
+    textarea, pre { width: 100%; font-family: monospace; margin-top: 1em; padding: 1em; }
+    button { font-size: 1em; padding: 0.5em 1.5em; }
+  </style>
+</head>
+<body>
+  <h1>🌌 NĀRA Infinity Agent Simulator</h1>
+
+  <textarea id="naraOutput" rows="20" readonly></textarea>
+  <button onclick="startNara()">🌱 Initiate Agent Logic</button>
+
+  <script>
+    const memory = { "सत्रः": "भ्रष्टः" };
+    const agents = {
+      "निरीक्षक": () => {
+        if (memory["सत्रः"] === "भ्रष्टः") {
+          log("🔁 सत्रः == भ्रष्टः → प्रत्युपकर्षं underway...");
+          memory["सूत्रः"] = "https://github.com/Adtiya/nara-language";
+          memory["त्रुटिः"] = "LLM correction needed";
+          invoke("सुधारक");
+        }
+      },
+      "सुधारक": () => {
+        if (memory["त्रुटिः"]) {
+          memory["नवाचारः"] = "Resolved via reflection";
+          memory["त्रुटिः"] = null;
+          memory["सत्रः"] = "संशोधित";
+          invoke("योजना-कर्ता");
+        }
+      },
+      "योजना-कर्ता": () => {
+        if (memory["सत्रः"] === "संशोधित") {
+          memory["योजना"] = "Initiate harmonic agent swarm";
+          invoke("संयोजक");
+        }
+      },
+      "संयोजक": () => {
+        if (memory["योजना"]) {
+          memory["तंत्रः"] = "Agent links initialized";
+          invoke("पर्यवेक्षक");
+        }
+      },
+      "पर्यवेक्षक": () => {
+        memory["स्थिति"] = memory["तंत्रः"] ? "समुन्नत" : "रिक्त";
+        invoke("प्रदर्शक");
+      },
+      "प्रदर्शक": () => {
+        memory["दृश्यः"] = "";
+        if (memory["सूत्रः"]) memory["दृश्यः"] += "सूत्र उपलब्ध: " + memory["सूत्रः"];
+        if (memory["योजना"]) memory["दृश्यः"] += " | योजना: " + memory["योजना"];
+        if (memory["स्थिति"]) memory["दृश्यः"] += " | स्थिति: " + memory["स्थिति"];
+        invoke("प्रतिबिंब");
+      },
+      "प्रतिबिंब": () => {
+        if (memory["दृश्यः"]) {
+          memory["पुनरावृत्तिः"] = "पुनः विश्लेषण चालू";
+          invoke("निरीक्षक");
+        }
+      }
+    };
+
+    function invoke(name) {
+      log("🧠 Executing Agent: " + name);
+      agents[name]();
+    }
+
+    function log(msg) {
+      const output = document.getElementById("naraOutput");
+      output.value += msg + "\n";
+    }
+
+    function startNara() {
+      document.getElementById("naraOutput").value = "";
+      invoke("निरीक्षक");
+      log("\n🧾 Final स्मृति:\n" + JSON.stringify(memory, null, 2));
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NĀRA Console with .nara File Upload</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 1em; background: #fdfafc; }
+    textarea, pre, canvas { width: 100%; margin-top: 1em; }
+    button { padding: 0.5em 1em; margin-top: 1em; font-size: 1em; }
+    .section { margin-bottom: 2em; }
+    #memory, #stack, #log { white-space: pre-wrap; background: #efefef; padding: 1em; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>📂 NĀRA Console with .nara File Execution</h1>
+
+  <div class="section">
+    <h2>📤 Upload .nara File</h2>
+    <input type="file" id="naraFile" accept=".nara" />
+    <button onclick="loadNaraFile()">Load Code</button>
+  </div>
+
+  <div class="section">
+    <h2>🧾 Agent Code</h2>
+    <textarea id="naraCode" rows="10" placeholder="Loaded .nara code will appear here..."></textarea>
+    <button onclick="runRecursiveAgent()">Run Agent</button>
+  </div>
+
+  <div class="section">
+    <h2>👥 Agent Stack</h2>
+    <pre id="stack"></pre>
+  </div>
+
+  <div class="section">
+    <h2>🧠 Shared Memory</h2>
+    <pre id="memory">{}</pre>
+  </div>
+
+  <div class="section">
+    <h2>📈 Memory Evolution</h2>
+    <canvas id="memoryChart" height="100"></canvas>
+  </div>
+
+  <div class="section">
+    <h2>📜 Execution Log</h2>
+    <pre id="log"></pre>
+  </div>
+
+  <script>
+    let sharedMemory = {
+      'सत्रः': 'भ्रष्टः',
+      'त्रुटिः': 'LLM connection failed',
+    };
+    let agentStack = [];
+    let memoryEvolution = [];
+
+    function spawnAgent(name, logic) {
+      return {
+        name,
+        memory: JSON.parse(JSON.stringify(sharedMemory)),
+        code: logic
+      };
+    }
+
+    function recordMemoryStep(stepLabel) {
+      memoryEvolution.push({ label: stepLabel, size: Object.keys(sharedMemory).length });
+      updateMemoryChart();
+    }
+
+    async function runRecursiveAgent() {
+      const code = document.getElementById('naraCode').value;
+      const log = [];
+
+      agentStack = [spawnAgent('निरीक्षक', code)];
+      memoryEvolution = [];
+      recordMemoryStep("शुरुआत");
+
+      for (let i = 0; i < agentStack.length; i++) {
+        const agent = agentStack[i];
+        log.push(`🔁 Executing Agent: ${agent.name}`);
+
+        if (agent.code.includes("सत्रः") && agent.memory['सत्रः'] === 'भ्रष्टः') {
+          log.push("📌 सत्रः == भ्रष्टः → प्रत्युपकर्षं in process...");
+
+          if (agent.code.includes("स्मृति[\"सूत्रः\"]")) {
+            agent.memory["सूत्रः"] = "https://github.com/Adtiya/nara-language";
+            log.push("🔗 Updated स्मृति['सूत्रः']");
+          }
+
+          if (agent.code.includes("आह्वानं")) {
+            const mockRes = await fetch("https://jsonplaceholder.typicode.com/posts/4").then(r => r.json());
+            agent.memory["नवाचारः"] = "LLM: " + mockRes.title;
+            log.push("📡 आह्वानं fetched: " + mockRes.title);
+          }
+
+          if (agent.code.includes("एजेंट")) {
+            agentStack.push(spawnAgent('सुधारक', `
+              यदि स्मृति["त्रुटिः"]:
+                  स्मृति["त्रुटिः"] = "Resolved"
+                  स्मृति["नवाचारः"] = "Self-healed"
+            `));
+            log.push("🌱 Agent 'सुधारक' spawned.");
+          }
+
+          agent.memory['सत्रः'] = 'संशोधित';
+          log.push("✅ Agent 'सत्रः' updated to 'संशोधित'");
+        } else {
+          log.push("⚠️ No matching logic for: " + agent.name);
+        }
+
+        Object.assign(sharedMemory, agent.memory);
+        recordMemoryStep(agent.name);
+      }
+
+      document.getElementById('memory').textContent = JSON.stringify(sharedMemory, null, 2);
+      document.getElementById('stack').textContent = agentStack.map(a => a.name).join(" → ");
+      document.getElementById('log').textContent = log.join('\n');
+    }
+
+    function loadNaraFile() {
+      const fileInput = document.getElementById('naraFile');
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        document.getElementById('naraCode').value = e.target.result;
+      };
+
+      if (fileInput.files.length > 0) {
+        reader.readAsText(fileInput.files[0]);
+      }
+    }
+
+    function updateMemoryChart() {
+      const labels = memoryEvolution.map(m => m.label);
+      const data = memoryEvolution.map(m => m.size);
+      memoryChart.data.labels = labels;
+      memoryChart.data.datasets[0].data = data;
+      memoryChart.update();
+    }
+
+    const ctx = document.getElementById('memoryChart').getContext('2d');
+    const memoryChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: '🧠 Memory Size Over Time',
+          data: [],
+          borderColor: 'green',
+          borderWidth: 2,
+          fill: false,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { stepSize: 1 }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

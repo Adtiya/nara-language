@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html lang="sa">
+<head>
+  <meta charset="UTF-8">
+  <title>🧠 NĀRA Memory Dashboard</title>
+  <style>
+    body { font-family: sans-serif; background: #f9f9f9; color: #222; padding: 2em; }
+    h1 { font-size: 1.5em; }
+    pre { background: #fff; padding: 1em; border: 1px solid #ccc; overflow-x: auto; }
+    #score { font-weight: bold; margin-top: 1em; font-size: 1.2em; color: #0c0; }
+  </style>
+</head>
+<body>
+  <h1>🧠 NĀRA Live Memory Dashboard</h1>
+  <p>Auto-refreshes every 2 seconds from <code>nara_memory_trace.json</code></p>
+  <pre id="memoryDisplay">Loading...</pre>
+  <div id="score"></div>
+
+  <script>
+    function fetchMemory() {
+      fetch("nara_memory_trace.json")
+        .then(res => res.json())
+        .then(data => {
+          const display = document.getElementById("memoryDisplay");
+          display.textContent = JSON.stringify(data, null, 2);
+
+          const karma = Object.keys(data).length * 30; // simple score
+          document.getElementById("score").textContent = "🪷 Karma Score: " + karma;
+        })
+        .catch(err => {
+          document.getElementById("memoryDisplay").textContent = "❌ Unable to load memory file.";
+          document.getElementById("score").textContent = "";
+        });
+    }
+
+    setInterval(fetchMemory, 2000);
+    fetchMemory();
+  </script>
+</body>
+</html>

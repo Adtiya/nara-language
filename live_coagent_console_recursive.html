@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NĀRA Recursive Agent Stack Console</title>
+  <style>
+    body { font-family: sans-serif; padding: 1em; background: #f5fff5; }
+    textarea, pre { width: 100%; padding: 1em; margin-top: 1em; font-family: monospace; }
+    button { padding: 0.5em 1em; margin-top: 1em; font-size: 1em; }
+    .section { margin-bottom: 2em; }
+    #memory, #stack, #log { white-space: pre-wrap; background: #efefef; padding: 1em; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>🔁 NĀRA Recursive Agent Stack Console</h1>
+
+  <div class="section">
+    <h2>🧾 Root Agent Code (.nara)</h2>
+    <textarea id="naraCode" rows="10" placeholder="एजेंट 'निरीक्षक': यदि ..."></textarea>
+    <button onclick="runRecursiveAgent()">Run Recursive Agent</button>
+  </div>
+
+  <div class="section">
+    <h2>📚 Agent Stack</h2>
+    <pre id="stack"></pre>
+  </div>
+
+  <div class="section">
+    <h2>🧠 Shared Memory</h2>
+    <pre id="memory">{}</pre>
+  </div>
+
+  <div class="section">
+    <h2>📜 Recursive Execution Log</h2>
+    <pre id="log"></pre>
+  </div>
+
+  <script>
+    let sharedMemory = {
+      'सत्रः': 'भ्रष्टः',
+      'त्रुटिः': 'LLM connection failed',
+    };
+
+    let agentStack = [];
+
+    function spawnAgent(name, logic) {
+      return {
+        name,
+        memory: JSON.parse(JSON.stringify(sharedMemory)), // inherit
+        code: logic
+      };
+    }
+
+    async function runRecursiveAgent() {
+      const code = document.getElementById('naraCode').value;
+      const log = [];
+
+      agentStack = [spawnAgent('निरीक्षक', code)];
+
+      for (let i = 0; i < agentStack.length; i++) {
+        const agent = agentStack[i];
+        log.push(`🧠 Executing Agent: ${agent.name}`);
+
+        if (agent.code.includes("सत्रः") && agent.memory['सत्रः'] === 'भ्रष्टः') {
+          log.push("🔁 सत्रः == भ्रष्टः → प्रत्युपकर्षं underway...");
+
+          if (agent.code.includes("स्मृति[\"सूत्रः\"]")) {
+            agent.memory["सूत्रः"] = "https://github.com/Adtiya/nara-language";
+            log.push("📎 Agent updated memory['सूत्रः']");
+          }
+
+          if (agent.code.includes("आह्वानं")) {
+            const mockRes = await fetch("https://jsonplaceholder.typicode.com/posts/2").then(r => r.json());
+            agent.memory["नवाचारः"] = "LLM: " + mockRes.title;
+            log.push("📡 आह्वानं result: " + mockRes.title);
+          }
+
+          if (agent.code.includes("एजेंट")) {
+            agentStack.push(spawnAgent('सुधारक', `
+              यदि स्मृति["त्रुटिः"]:
+                  स्मृति["त्रुटिः"] = "Resolved"
+                  स्मृति["नवाचारः"] = "Self-corrected"
+            `));
+            log.push("🌱 Spawned agent: सुधारक");
+          }
+
+          agent.memory['सत्रः'] = 'संशोधित';
+          log.push("✅ Agent memory['सत्रः'] → 'संशोधित'");
+        } else {
+          log.push("❌ No rules matched for agent: " + agent.name);
+        }
+
+        // Update shared memory from agent
+        Object.assign(sharedMemory, agent.memory);
+      }
+
+      document.getElementById('memory').textContent = JSON.stringify(sharedMemory, null, 2);
+      document.getElementById('stack').textContent = agentStack.map(a => a.name).join(" → ");
+      document.getElementById('log').textContent = log.join('\n');
+    }
+  </script>
+</body>
+</html>
