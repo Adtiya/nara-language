@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NĀRA Console + Secure Guru Proxy</title>
+  <style>
+    body { font-family: sans-serif; padding: 1em; background: #f9fdfc; }
+    textarea, pre { width: 100%; margin-top: 1em; padding: 1em; font-family: monospace; }
+    button { padding: 0.6em 1.2em; margin-top: 1em; font-size: 1em; }
+    .section { margin-bottom: 2em; }
+    #memory, #log, #guru { white-space: pre-wrap; background: #efefef; padding: 1em; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>🧘 NĀRA Live Console with Secure Guru Proxy</h1>
+
+  <div class="section">
+    <h2>📂 Upload .nara File</h2>
+    <input type="file" id="naraFile" accept=".nara" />
+    <button onclick="loadNaraFile()">Load Code</button>
+  </div>
+
+  <div class="section">
+    <h2>🧾 Agent Code</h2>
+    <textarea id="naraCode" rows="10" placeholder="Your .nara code will appear here..."></textarea>
+    <button onclick="runGuru()">Run via Guru Proxy</button>
+  </div>
+
+  <div class="section">
+    <h2>🧠 Shared Memory</h2>
+    <pre id="memory">{ "सत्रः": "भ्रष्टः" }</pre>
+  </div>
+
+  <div class="section">
+    <h2>📜 Guru Response</h2>
+    <pre id="guru">Waiting for Guru wisdom...</pre>
+  </div>
+
+  <script>
+    function loadNaraFile() {
+      const file = document.getElementById("naraFile").files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById("naraCode").value = e.target.result;
+      };
+      reader.readAsText(file);
+    }
+
+    async function runGuru() {
+      const code = document.getElementById("naraCode").value;
+      const guruOutput = document.getElementById("guru");
+      guruOutput.textContent = "🧘 Thinking...";
+
+      try {
+        const response = await fetch("https://nara-api.onrender.com/api/guru"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            code,
+            context: "Reflective memory session: भ्रष्टः"
+          })
+        });
+        const result = await response.json();
+        if (result.reply) {
+          guruOutput.textContent = "🕉️ " + result.reply;
+        } else {
+          guruOutput.textContent = "⚠️ Error: " + (result.error || "Unknown");
+        }
+      } catch (err) {
+        guruOutput.textContent = "❌ Network error: " + err.message;
+      }
+    }
+  </script>
+</body>
+</html>

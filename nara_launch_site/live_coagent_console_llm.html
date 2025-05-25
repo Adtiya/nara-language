@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NĀRA Co-Agent Console with LLM API</title>
+  <style>
+    body { font-family: sans-serif; padding: 1em; background: #f0f8ff; }
+    textarea, pre { width: 100%; padding: 1em; margin-top: 1em; font-family: monospace; }
+    button { padding: 0.5em 1em; margin-top: 1em; font-size: 1em; }
+    .section { margin-bottom: 2em; }
+    #memory { white-space: pre-wrap; background: #efefef; padding: 1em; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>🤖 NĀRA Co-Agent Console + LLM API</h1>
+
+  <div class="section">
+    <h2>Enter .nara Logic</h2>
+    <textarea id="naraCode" rows="10" placeholder="e.g., यदि स्मृति['सत्रः'] == 'भ्रष्टः': ..."></textarea>
+    <button onclick="runNara()">Run Agent</button>
+  </div>
+
+  <div class="section">
+    <h2>📘 स्मृति (Memory)</h2>
+    <pre id="memory">{}</pre>
+  </div>
+
+  <div class="section">
+    <h2>🌀 Execution Log</h2>
+    <pre id="log"></pre>
+  </div>
+
+  <script>
+    let memory = {
+      'सत्रः': 'भ्रष्टः',
+      'त्रुटिः': 'LLM connection failed',
+    };
+
+    async function runNara() {
+      const code = document.getElementById('naraCode').value;
+      const log = [];
+
+      try {
+        if (code.includes("सत्रः") && memory['सत्रः'] === 'भ्रष्टः') {
+          log.push("📌 सत्रः == भ्रष्टः → Executing प्रत्युपकर्षं ...");
+
+          if (code.includes("स्मृति[\"सूत्रः\"]")) {
+            memory["सूत्रः"] = "https://github.com/Adtiya/nara-language";
+            log.push("🔗 स्मृति['सूत्रः'] updated.");
+          }
+
+          if (code.includes("आह्वानं")) {
+            log.push("📡 Performing आह्वानं (LLM call) ...");
+
+            const mockResponse = await fetch("https://jsonplaceholder.typicode.com/posts/1")
+              .then(res => res.json());
+
+            memory["नवाचारः"] = "LLM: " + mockResponse.title;
+            log.push("✅ आह्वानं simulated: " + mockResponse.title);
+          }
+
+          memory['सत्रः'] = 'संशोधित';
+          log.push("✅ स्मृति['सत्रः'] updated to 'संशोधित'");
+        } else {
+          log.push("❌ No matching rule executed.");
+        }
+
+        document.getElementById('memory').textContent = JSON.stringify(memory, null, 2);
+        document.getElementById('log').textContent = log.join('\n');
+      } catch (e) {
+        document.getElementById('log').textContent = "Error: " + e.message;
+      }
+    }
+  </script>
+</body>
+</html>

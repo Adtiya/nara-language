@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NĀRA Console + OpenAI Integration</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 1em; background: #f5fcff; }
+    textarea, pre, canvas { width: 100%; margin-top: 1em; }
+    button { padding: 0.5em 1em; margin-top: 1em; font-size: 1em; }
+    .section { margin-bottom: 2em; }
+    #memory, #stack, #log { white-space: pre-wrap; background: #efefef; padding: 1em; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>🤖 NĀRA Console with OpenAI</h1>
+
+  <div class="section">
+    <h2>Upload .nara File</h2>
+    <input type="file" id="naraFile" accept=".nara" />
+    <button onclick="loadNaraFile()">Load Code</button>
+  </div>
+
+  <div class="section">
+    <h2>Agent Code</h2>
+    <textarea id="naraCode" rows="10"></textarea>
+    <button onclick="runAgent()">Run Agent</button>
+  </div>
+
+  <div class="section">
+    <h2>Shared Memory</h2>
+    <pre id="memory">{}</pre>
+  </div>
+
+  <div class="section">
+    <h2>Execution Log</h2>
+    <pre id="log"></pre>
+  </div>
+
+  <script>
+    let memory = { 'सत्रः': 'भ्रष्टः', 'त्रुटिः': 'LLM connection failed' };
+
+    async function runAgent() {
+      const code = document.getElementById('naraCode').value;
+      const log = [];
+
+      if (code.includes("सत्रः") && memory['सत्रः'] === 'भ्रष्टः') {
+        log.push("Detected भ्रष्टः सत्रः, invoking OpenAI...");
+
+        try {
+          const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer YOUR_OPENAI_API_KEY"
+            },
+            body: JSON.stringify({
+              model: "gpt-4",
+              messages: [{ role: "system", content: "Fix the session issue." }]
+            })
+          }).then(res => res.json());
+
+          const message = openaiResponse.choices?.[0]?.message?.content || "No response.";
+          memory["नवाचारः"] = "OpenAI: " + message;
+          memory["सत्रः"] = "संशोधित";
+          log.push("✅ OpenAI replied: " + message);
+        } catch (err) {
+          log.push("❌ OpenAI API error: " + err.message);
+        }
+      } else {
+        log.push("No logic matched.");
+      }
+
+      document.getElementById('memory').textContent = JSON.stringify(memory, null, 2);
+      document.getElementById('log').textContent = log.join('\n');
+    }
+
+    function loadNaraFile() {
+      const reader = new FileReader();
+      reader.onload = e => { document.getElementById('naraCode').value = e.target.result; };
+      const file = document.getElementById('naraFile').files[0];
+      if (file) reader.readAsText(file);
+    }
+  </script>
+</body>
+</html>

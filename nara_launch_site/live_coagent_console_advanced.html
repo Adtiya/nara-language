@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NĀRA Recursive Co-Agent Console: Advanced</title>
+  <style>
+    body { font-family: sans-serif; padding: 1em; background: #f4fbff; }
+    textarea, pre { width: 100%; padding: 1em; margin-top: 1em; font-family: monospace; }
+    button { padding: 0.5em 1em; margin-top: 1em; font-size: 1em; }
+    .section { margin-bottom: 2em; }
+    #memory, #agents, #karma, #log { white-space: pre-wrap; background: #efefef; padding: 1em; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>🌌 NĀRA Recursive Co-Agent Console: Advanced</h1>
+
+  <div class="section">
+    <h2>🎯 Agent Code (.nara logic)</h2>
+    <textarea id="naraCode" rows="10" placeholder="एजेंट 'निरीक्षक': यदि ..."></textarea>
+    <button onclick="runNara()">Run Agent</button>
+  </div>
+
+  <div class="section">
+    <h2>🧠 स्मृति (Memory)</h2>
+    <pre id="memory">{}</pre>
+  </div>
+
+  <div class="section">
+    <h2>👥 Active Agents</h2>
+    <pre id="agents">निरीक्षक</pre>
+  </div>
+
+  <div class="section">
+    <h2>📈 कर्म (Karma Scores)</h2>
+    <pre id="karma">{}</pre>
+  </div>
+
+  <div class="section">
+    <h2>📜 Execution Log</h2>
+    <pre id="log"></pre>
+  </div>
+
+  <script>
+    let memory = {
+      'सत्रः': 'भ्रष्टः',
+      'त्रुटिः': 'LLM connection failed',
+    };
+
+    let agents = ['निरीक्षक'];
+    let karma = {};
+
+    async function runNara() {
+      const code = document.getElementById('naraCode').value;
+      const log = [];
+
+      try {
+        const agent = agents[agents.length - 1];
+        log.push("🧠 Running Agent: " + agent);
+
+        if (code.includes("सत्रः") && memory['सत्रः'] === 'भ्रष्टः') {
+          log.push("📌 सत्रः == भ्रष्टः → Executing प्रत्युपकर्षं ...");
+
+          if (code.includes("स्मृति[\"सूत्रः\"]")) {
+            memory["सूत्रः"] = "https://github.com/Adtiya/nara-language";
+            log.push("🔗 स्मृति['सूत्रः'] updated.");
+            karma[agent] = (karma[agent] || 0) + 5;
+          }
+
+          if (code.includes("आह्वानं")) {
+            log.push("📡 Performing आह्वानं (LLM call) ...");
+            const mockResponse = await fetch("https://jsonplaceholder.typicode.com/posts/1")
+              .then(res => res.json());
+
+            memory["नवाचारः"] = "LLM: " + mockResponse.title;
+            log.push("✅ आह्वानं response: " + mockResponse.title);
+            karma[agent] = (karma[agent] || 0) + 10;
+          }
+
+          if (code.includes("एजेंट")) {
+            agents.push("सुधारक");
+            log.push("👥 Agent 'सुधारक' spawned.");
+            karma["सुधारक"] = 0;
+          }
+
+          memory['सत्रः'] = 'संशोधित';
+          log.push("✅ स्मृति['सत्रः'] updated to 'संशोधित'");
+        } else {
+          log.push("❌ No matching rule executed.");
+          karma[agent] = (karma[agent] || 0) - 1;
+        }
+
+        document.getElementById('memory').textContent = JSON.stringify(memory, null, 2);
+        document.getElementById('agents').textContent = agents.join(", ");
+        document.getElementById('karma').textContent = JSON.stringify(karma, null, 2);
+        document.getElementById('log').textContent = log.join('\n');
+
+      } catch (e) {
+        document.getElementById('log').textContent = "Error: " + e.message;
+      }
+    }
+  </script>
+</body>
+</html>
